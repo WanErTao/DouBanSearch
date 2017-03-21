@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DouBan</title>
+<style>
+	#searchText{
+		width:300px;
+		height:30px;
+		font-size:20px;
+		padding:5px;
+	}
+	#searchBtn{
+		width:60px;
+		height:40px;
+		padding:5px;
+	}
+	dl{
+		font-size:30px;
+		border-bottom:1px solid gray;
+	}
+</style>
+<script>
+	function fn1(data){
+		var oMsg =document.getElementById('msg');
+		var oList =document.getElementById('list');
+		var oSearchText =document.getElementById('searchText');
+		var html ='';
+		var maxRes=10;
+		var iPage=1;
+		oMsg.innerHTML=data.title.$t + ' : ' + data['opensearch:totalResults'].$t;
+		var aEntry = data.entry;
+
+		window.onscroll=function(){
+			var oScroll=document.documentElement.scrollTop||document.body.scrollTop;
+			var iTop =document.documentElement.clientHeight+oScroll;
+			var oTop =document.body.clientHeight;
+			var t =oTop-iTop;
+			if(data.entry.length){
+				if(t<0){
+					//maxRes+=10;
+					iPage++;
+					alert('第'+iPage+'页');
+					oMsg.innerHTML=data.title.$t + ' : ' + data['opensearch:totalResults'].$t;
+					var aEntry = data.entry;
+					var html ='';
+					for(var i=0;i<aEntry.length;i++){
+						html+='<dl><dt>'+aEntry[i].title.$t+'</dt><dd><img src="'+aEntry[i].link[2]['@href']+'"></dd></dl>'
+					}
+					oList.innerHTML+=html;
+				}
+			}else{
+				alert('已经到最后啦~');
+			}
+		}
+
+		if(oSearchText.value!=''){
+			for(var i=0;i<aEntry.length;i++){
+				html+='<dl><dt>'+aEntry[i].title.$t+'</dt><dd><img src="'+aEntry[i].link[2]['@href']+'"></dd></dl>'
+			}
+		}
+		oList.innerHTML=html;
+	}
+	window.onload=function(){
+		var oSearchBtn =document.getElementById('searchBtn');
+		var oSearchText =document.getElementById('searchText');
+		var oMsg =document.getElementById('oMsg');
+		var oList =document.getElementById('list');
+		var maxRes=10;
+		var iPage=1;
+
+		oSearchBtn.onclick=function(){
+			if(oSearchText.value!=''){
+				var oScript =document.createElement('script');
+				oScript.src='http://api.douban.com/book/subjects?q='+oSearchText.value+'&alt=xd&callback=fn1&max-results='+maxRes+'&start-index='+iPage*maxRes;
+				document.body.appendChild(oScript);
+			}
+		}
+
+	}
+
+	//http://api.douban.com/book/subjects?q='+oQ.value+'&alt=xd&callback=fn1&start-index=(当前页*每页显示的条数)&max-results=10(每页显示的条数)
+</script>
+</head>
+<body>
+<input type="text" placeholder="请输入想搜索的书籍" id="searchText">
+<input type="button" value="搜索" id="searchBtn">
+<p id="msg"></p>
+<hr/>
+<div id="list">
+</div>
+</body>
+</html>
